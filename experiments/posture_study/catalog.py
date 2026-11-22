@@ -1,0 +1,53 @@
+"""Hypotheses registered before model outcomes are inspected."""
+
+# ID, method, Korean hypothesis and testable mechanism, family
+ROWS = [
+('B00','baseline','활성 RBF-SVM을 공통 학습 조건으로 재학습한 대조군','classical'),
+('H01','relative','절대 압력을 제거하면 체중·센서 전체 이득의 개인차에 덜 의존한다','classical'),
+('H02','spatial','압력 중심·행열 분포의 작은 특징 집합이 잡음과 고차원 과적합을 줄인다','classical'),
+('H03','robust','중앙값·사분위수 스케일링이 극단 센서값의 영향을 줄인다','classical'),
+('H04','select','훈련 데이터의 클래스 구분력이 높은 96개 특징만 남기면 과적합이 줄어든다','classical'),
+('H05','pca','훈련 PCA로 상관 특징을 압축하면 중복과 잡음이 줄어든다','classical'),
+('H06','personal','독립 정자세 등록 기준과 현재 압력의 차이가 개인별 체형·착석 차이를 설명한다','classical'),
+('H07','multiscale','같은 3초 창 안의 최근 1·2초 특징은 단기 변화와 전체 자세를 함께 포착한다','classical'),
+('H08','subject_weight','사용자별 총 학습 가중치를 균등하게 하면 기록이 많은 사용자에 대한 편향이 줄어든다','classical'),
+('H09','gain_aug','훈련 센서별 이득 변동 증강은 다른 사용자·장착 조건에 대한 강건성을 높인다','classical'),
+('H10','hierarchy','정자세/오자세 판별 후 6종 세부 판별을 하면 각 결정 경계가 단순해진다','classical'),
+('H11','soft_hierarchy','2단계 확률을 곱하는 부드러운 분기는 하드 게이트의 오류 전파를 줄인다','classical'),
+('H12','extra_trees','무작위 임계값의 다수 트리는 비선형 상호작용을 낮은 분산으로 포착한다','classical'),
+('H13','histboost','부스팅은 이전 단계의 잔여 오류를 순차적으로 보정한다','classical'),
+('H14','lda','수축 공분산의 선형 판별은 소규모 데이터에서 복잡한 경계보다 일반화할 수 있다','classical'),
+('H15','knn','거리 가중 이웃 분류는 하나의 전역 경계가 설명하기 어려운 여러 착석 유형을 보존한다','classical'),
+('H16','random_conv','고정 무작위 시간 합성곱과 선형 판별은 적은 학습 매개변수로 다양한 시간 패턴을 표현한다','classical'),
+('H17','majority','SVM·선형 모델·트리의 다수결이 서로 다른 모델의 단발성 오류를 상쇄한다','classical'),
+('H18','weighted','사용자 분리 OOF 성능에 따른 확률 가중 투표가 좋은 구성원의 기여를 늘린다','classical'),
+('H19','stacking','사용자 분리 OOF 출력으로 학습한 메타 분류기가 클래스별 모델 신뢰도를 학습한다','classical'),
+('H20','1dcnn','시간 합성곱이 수작업 통계에서 사라지는 국소 센서 변화를 학습한다','neural'),
+('H21','spatial2dcnn','4×4 센서 격자의 공간 합성곱이 인접 압력 패턴을 학습한다','neural'),
+('H22','lstm','LSTM의 시간 상태가 지속되는 자세와 일시적 변동을 구분한다','neural'),
+('H23','gru','더 적은 게이트를 갖는 GRU가 작은 데이터에서 효율적인 시간 표현을 학습한다','neural'),
+('H24','cnn_lstm','CNN의 국소 패턴과 LSTM의 순서 기억을 결합하면 복합 시간 변화가 드러난다','neural'),
+('H25','attention','학습된 시간 가중치가 분류에 유용한 순간에 집중한다','neural'),
+('H26','transformer','위치 정보를 갖는 자기주의가 창 안에서 멀리 떨어진 센서 상태의 관계를 학습한다','neural'),
+('H27','tcn','팽창 합성곱이 여러 시간 범위를 작은 모형으로 결합한다','neural'),
+('H28','mlp','수작업 특징의 비선형 조합을 작은 다층 퍼셉트론이 직접 학습한다','neural'),
+('H29','aug_cnn','CNN에 훈련 센서 이득·잡음 증강을 넣으면 센서 조건 변화에 덜 과적합한다','neural'),
+('H30','hybrid','CNN 임베딩을 SVM 입력으로 사용하면 학습 표현과 마진 기반 분류의 장점을 결합한다','hybrid'),
+('H31','ema','과거 확률의 지수 평균이 짧은 예측 흔들림을 줄인다','temporal'),
+('H32','hysteresis','새 자세가 연속 확인될 때만 전환하면 단발성 분류 오류를 억제한다','temporal'),
+]
+CATALOG=[dict(id=i,method=m,hypothesis=h,family=f) for i,m,h,f in ROWS]
+
+PROTOCOL={
+ 'version':'1.0.0','selection_metric':'validation Macro F1, per-class F1, subject robustness',
+ 'seeds':[20260826,20260913,20260914],
+ 'validation_design':'primary historical subject partition plus two subject-disjoint development resplits; fixed historical test subjects',
+ 'successful_rule':{'mean_macro_f1_delta_min':.005,'positive_splits_min':2,
+  'mean_worst_class_delta_min':-.02,'classes_mean_f1_non_degrading_min':4},
+ 'combination_rule':'Only successful independent components; accept additions if mean Macro F1 increases >=.002, positive split deltas >=2, mean worst class drops <=.02',
+ 'simplicity_rule':'Within .002 mean validation Macro F1 prefer lower measured primary single-window latency',
+ 'test_rule':'freeze selected ID, configs and all checkpoint hashes before evaluating any test predictions; no changes selected using test',
+ 'neural_training':{'epochs_max':60,'patience':10,'batch_size':64,'device':'cpu','threads':2},
+ 'temporal':'causal, reset on observed recording boundary, no future or ground-truth resets; static clips do not validate transitions',
+ 'personalization':'first correct recording by NFC path order, first 10 seconds mean, entire record excluded for all arms; retrospective registration proxy',
+}

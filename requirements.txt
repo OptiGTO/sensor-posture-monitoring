@@ -1,0 +1,8 @@
+-r requirements_core.txt
+
+# Optional model families and their runtime dependencies
+catboost>=1.2
+lightgbm>=4.1
+numba>=0.63,<1
+torch>=2.1
+xgboost>=2.0

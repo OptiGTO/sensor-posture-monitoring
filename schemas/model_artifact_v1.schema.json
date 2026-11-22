@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Posture model artifact v1",
+  "type": "object",
+  "required": ["schema_version", "artifact_id", "display_name", "version", "backend", "model_family", "artifact_file", "artifact_sha256", "labels", "input_channels", "sampling_rate", "window", "deployment_status"],
+  "properties": {"schema_version": {"const": 1}, "backend": {"enum": ["sklearn", "pytorch"]}, "deployment_status": {"enum": ["experimental", "validated", "revoked"]}, "window": {"type": "object", "required": ["policy"], "properties": {"policy": {"enum": ["fixed", "discrete", "range"]}}}}
+}
